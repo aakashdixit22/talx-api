@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 import os
 import logging
 from flask_cors import CORS
-
+import google.generativeai as genai
+import io
 
 
 
@@ -18,6 +19,11 @@ GROQ_API_KEY = os.getenv('GROQ_API_KEY')
 if not GROQ_API_KEY:
     raise EnvironmentError("GROQ_API_KEY is missing. Please check your .env file.")
 
+GOOGLE_GEMINI_API_KEY = os.getenv('GOOGLE_GEMINI_API_KEY')
+
+genai.configure(api_key=GOOGLE_GEMINI_API_KEY)
+model = genai.GenerativeModel("gemini-1.5-flash")
+
 client = Groq(api_key=GROQ_API_KEY)
 
 
@@ -29,10 +35,53 @@ def home():
     """Home route for health check."""
     return 'Hello, World!'
 
+@app.route('/upload-resume', methods=['POST'])
+def uploadResume():
+    auth_secret_fetched = request.headers.get('Authorization') or request.headers.get('authorization') or request.json.get('authorization') or request.json.get('Authorization')
+    if not auth_secret_fetched:
+        return jsonify({'error': 'Authorization header is required.'}), 401
+    
+    if auth_secret_fetched != AUTH_SECRET:
+        return jsonify({'error': 'Invalid authorization secret.'}), 401
+    
+
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    if file and file.filename.lower().endswith('.pdf'):
+        try:
+            pdf_bytes = file.read()
+            pdf_stream = io.BytesIO(pdf_bytes)
+
+            sample_file = {
+                "mime_type": "application/pdf",
+                "data": pdf_stream.getvalue()
+            }
+
+        except Exception as e:
+            logging.error(f"Error reading in-memory file: {e}")
+            return jsonify({"error": f"Error reading file: {e}"}), 500
+
+        
+
+        try:
+            response = model.generate_content(["Give me a summary of this pdf file.", sample_file])
+            summary = response.text
+            return jsonify({"summary": summary})
+        except Exception as e:
+            logging.error(f"Error generating summary: {e}")
+            return jsonify({"error": f"Error generating summary: {e}"}), 500
+        
+
+
 @app.route('/genie', methods=['POST'])
 def genie():
     chat_history = request.json.get('chat_history')
-    print(chat_history)
     auth_secret_fetched = request.headers.get('Authorization') or request.headers.get('authorization') or request.json.get('authorization') or request.json.get('Authorization')
     if not auth_secret_fetched:
         return jsonify({'error': 'Authorization header is required.'}), 401
