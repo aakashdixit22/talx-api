@@ -35,6 +35,47 @@ def home():
     """Home route for health check."""
     return 'Hello, World!'
 
+def generate_prompt(job_description=None):
+    base_prompt = """
+        You are an advanced AI model designed to analyze the compatibility between a CV and a job description. 
+        Your task is to output a structured JSON format that includes the following:
+        
+        1. matching_analysis: Analyze the CV against the job description to identify key strengths and gaps.
+        2. description: Summarize the relevance of the CV to the job description in a few concise sentences.
+        3. score: Provide a numerical compatibility score (0-100) based on qualifications, skills, and experience.
+        4. recommendation: Suggest actions for the candidate to improve their match or readiness for the role.
+    """
+
+    if job_description:
+        prompt = f"""
+        {base_prompt}
+        Here is the Job Description: {job_description}
+        The CV is attached for analysis. Analyze the CV against the job description and provide detailed insights.
+        Your output must be in JSON format as follows:
+        {{
+          "matching_analysis": "Your detailed analysis here.",
+          "description": "A brief summary here.",
+          "score": 85,
+          "recommendation": "Your suggestions here."
+        }}
+        """
+    else:
+        prompt = f"""
+        {base_prompt}
+         The CV is attached for analysis. Analyze the CV and provide detailed insights. 
+        As no job description is provided, analyze the CV in general and suggest areas for improvement.
+        Your output must be in JSON format as follows:
+        {{
+          "matching_analysis": "Your detailed analysis here.",
+          "description": "A general summary here.",
+          "score": 70,
+          "skill_match_score": "The skill match score with the required skills in job description",
+          "recommendation": "Your suggestions here."
+        }}
+        """
+    return prompt
+
+
 @app.route('/upload-resume', methods=['POST'])
 def uploadResume():
     auth_secret_fetched = request.headers.get('Authorization') or request.headers.get('authorization') or request.json.get('authorization') or request.json.get('Authorization')
@@ -44,11 +85,14 @@ def uploadResume():
     if auth_secret_fetched != AUTH_SECRET:
         return jsonify({'error': 'Invalid authorization secret.'}), 401
     
+    job_description = request.form.get('job_description')
+    print(job_description)
 
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
 
     file = request.files['file']
+    print(file)
 
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
@@ -70,8 +114,10 @@ def uploadResume():
         
 
         try:
-            response = model.generate_content(["Give me a summary of this pdf file.", sample_file])
+            prompt = generate_prompt(job_description=job_description)
+            response = model.generate_content([prompt, sample_file])
             summary = response.text
+            print(summary)
             return jsonify({"summary": summary})
         except Exception as e:
             logging.error(f"Error generating summary: {e}")
