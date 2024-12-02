@@ -56,7 +56,7 @@ def generate_prompt(job_description=None):
           "matching_analysis": "Your detailed analysis here.",
           "description": "A brief summary here.",
           "score": 85,
-          "skill_match_score": "The skill match score with the required skills in job description",
+          "skill_match_score": "The skill match score with the required skills in job description. Out of 100. Only number here",
           "recommendation": "Your suggestions here."
         }}
         """
