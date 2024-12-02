@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, json, request, jsonify, Response
 from groq import Groq
 from dotenv import load_dotenv
 import os
@@ -56,6 +56,7 @@ def generate_prompt(job_description=None):
           "matching_analysis": "Your detailed analysis here.",
           "description": "A brief summary here.",
           "score": 85,
+          "skill_match_score": "The skill match score with the required skills in job description",
           "recommendation": "Your suggestions here."
         }}
         """
@@ -69,7 +70,6 @@ def generate_prompt(job_description=None):
           "matching_analysis": "Your detailed analysis here.",
           "description": "A general summary here.",
           "score": 70,
-          "skill_match_score": "The skill match score with the required skills in job description",
           "recommendation": "Your suggestions here."
         }}
         """
@@ -115,10 +115,25 @@ def uploadResume():
 
         try:
             prompt = generate_prompt(job_description=job_description)
+            print(prompt)
             response = model.generate_content([prompt, sample_file])
-            summary = response.text
+            print(response.text)
+            summary = response.text.strip()
+            
+            # Remove Markdown-style formatting if present
+            if summary.startswith("```json") and summary.endswith("```"):
+                summary = summary[7:-3].strip()
+            
+            # Convert the cleaned JSON string to a Python dictionary
             print(summary)
-            return jsonify({"summary": summary})
+            summary_json = None
+            try:
+                summary_json = json.loads(summary)
+            except Exception as parse_error:
+                logging.error(f"Error parsing JSON: {parse_error}")
+                return jsonify({"error": f"Error parsing JSON from model output: {parse_error}"}), 500
+
+            return jsonify({"summary":summary_json})
         except Exception as e:
             logging.error(f"Error generating summary: {e}")
             return jsonify({"error": f"Error generating summary: {e}"}), 500
