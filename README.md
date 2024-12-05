@@ -182,6 +182,3 @@ curl -X POST http://127.0.0.1:5000/genie \
 
 This project is licensed under the [MIT License](https://github.com/aakashdixit22/talx-api/blob/main/LICENSE).  
 
----  
-
-Let me know if further changes are required! 🚀
