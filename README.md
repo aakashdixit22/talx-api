@@ -80,6 +80,7 @@ Talx API is the core AI backend for the Talx job portal, handling functionalitie
       }
     }
     ```
+    - **Note**: The `skill_match_score` will only be included in the response if a `job_description` is provided.
 
 ---
 
