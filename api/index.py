@@ -217,7 +217,7 @@ def genie():
         chat_history.append({"role": "user", "content": user_query})
         
         completion = client.chat.completions.create(
-            model="llama-3.1-70b-versatile",
+            model="llama-3.3-70b-versatile",
             messages=chat_history,
             temperature=temperature,
             max_tokens=max_tokens,
