@@ -21,7 +21,7 @@
 
 Talx API is the core AI backend for the Talx job portal, handling functionalities such as:  
 1. **Resume Analysis**:  
-   - Analyzes resumes and job descriptions, providing compatibility scores and actionable recommendations using **Google Gemini 2.5 Flash**.  
+   - Analyzes resumes and job descriptions, providing compatibility scores and actionable recommendations using **Google Gemini 2.0 Flash**.  
 2. **Chat Assistant**:  
    - Powered by **Llama 3.1 Versatile** for career guidance and platform support.  
 3. **Streaming Responses**:  
