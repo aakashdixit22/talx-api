@@ -22,7 +22,7 @@ if not GROQ_API_KEY:
 GOOGLE_GEMINI_API_KEY = os.getenv('GOOGLE_GEMINI_API_KEY')
 
 genai.configure(api_key=GOOGLE_GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 client = Groq(api_key=GROQ_API_KEY)
 
