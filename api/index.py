@@ -27,12 +27,8 @@ client = Groq(api_key=GROQ_API_KEY)
 
 
 app = Flask(__name__)
-# CORS(app)
-CORS(app, resources={
-    r"/*": {
-        "origins": "https://talx.vercel.app"
-    }
-})
+CORS(app)
+
 
 @app.route('/')
 def home():
