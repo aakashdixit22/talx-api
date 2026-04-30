@@ -22,12 +22,17 @@ if not GROQ_API_KEY:
 GOOGLE_GEMINI_API_KEY = os.getenv('GOOGLE_GEMINI_API_KEY')
 
 genai.configure(api_key=GOOGLE_GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-3-flash")
+model = genai.GenerativeModel("gemini-2.5-flash")
 client = Groq(api_key=GROQ_API_KEY)
 
 
 app = Flask(__name__)
-CORS(app)
+# CORS(app)
+CORS(app, resources={
+    r"/*": {
+        "origins": "https://talx.vercel.app"
+    }
+})
 
 @app.route('/')
 def home():
