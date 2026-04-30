@@ -76,77 +76,8 @@ def generate_prompt(job_description=None):
     return prompt
 
 
-# @app.route('/upload-resume', methods=['POST'])
-# def uploadResume():
-#     auth_secret_fetched = request.headers.get('Authorization') or request.headers.get('authorization') or request.json.get('authorization') or request.json.get('Authorization')
-#     if not auth_secret_fetched:
-#         return jsonify({'error': 'Authorization header is required.'}), 401
-    
-#     if auth_secret_fetched != AUTH_SECRET:
-#         return jsonify({'error': 'Invalid authorization secret.'}), 401
-    
-#     job_description = request.form.get('job_description')
-#     print(job_description)
-
-#     if 'file' not in request.files:
-#         return jsonify({"error": "No file part"}), 400
-
-#     file = request.files['file']
-#     print(file)
-
-#     if file.filename == '':
-#         return jsonify({"error": "No selected file"}), 400
-
-#     if file and file.filename.lower().endswith('.pdf'):
-#         try:
-#             pdf_bytes = file.read()
-#             pdf_stream = io.BytesIO(pdf_bytes)
-
-#             sample_file = {
-#                 "mime_type": "application/pdf",
-#                 "data": pdf_stream.getvalue()
-#             }
-
-#         except Exception as e:
-#             logging.error(f"Error reading in-memory file: {e}")
-#             return jsonify({"error": f"Error reading file: {e}"}), 500
-
-        
-
-#         try:
-#             prompt = generate_prompt(job_description=job_description)
-#             print(prompt)
-#             response = model.generate_content([prompt, sample_file])
-#             print(response.text)
-#             summary = response.text.strip()
-            
-#             # Remove Markdown-style formatting if present
-#             if summary.startswith("```json") and summary.endswith("```"):
-#                 summary = summary[7:-3].strip()
-            
-#             # Convert the cleaned JSON string to a Python dictionary
-#             print(summary)
-#             summary_json = None
-#             try:
-#                 summary_json = json.loads(summary)
-#             except Exception as parse_error:
-#                 logging.error(f"Error parsing JSON: {parse_error}")
-#                 return jsonify({"error": f"Error parsing JSON from model output: {parse_error}"}), 500
-
-#             return jsonify({"summary":summary_json})
-#         except Exception as e:
-#             logging.error(f"Error generating summary: {e}")
-#             return jsonify({"error": f"Error generating summary: {e}"}), 500
-        
-@app.route('/upload-resume', methods=['POST', 'OPTIONS'])
+@app.route('/upload-resume', methods=['POST'])
 def uploadResume():
-    if request.method == 'OPTIONS':
-        response = jsonify({})
-        response.headers['Access-Control-Allow-Origin'] = '*'
-        response.headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, authorization'
-        return response, 200
-
     auth_secret_fetched = request.headers.get('Authorization') or request.headers.get('authorization') or request.json.get('authorization') or request.json.get('Authorization')
     if not auth_secret_fetched:
         return jsonify({'error': 'Authorization header is required.'}), 401
@@ -180,6 +111,8 @@ def uploadResume():
             logging.error(f"Error reading in-memory file: {e}")
             return jsonify({"error": f"Error reading file: {e}"}), 500
 
+        
+
         try:
             prompt = generate_prompt(job_description=job_description)
             print(prompt)
@@ -187,9 +120,11 @@ def uploadResume():
             print(response.text)
             summary = response.text.strip()
             
+            # Remove Markdown-style formatting if present
             if summary.startswith("```json") and summary.endswith("```"):
                 summary = summary[7:-3].strip()
             
+            # Convert the cleaned JSON string to a Python dictionary
             print(summary)
             summary_json = None
             try:
@@ -198,10 +133,12 @@ def uploadResume():
                 logging.error(f"Error parsing JSON: {parse_error}")
                 return jsonify({"error": f"Error parsing JSON from model output: {parse_error}"}), 500
 
-            return jsonify({"summary": summary_json})
+            return jsonify({"summary":summary_json})
         except Exception as e:
             logging.error(f"Error generating summary: {e}")
             return jsonify({"error": f"Error generating summary: {e}"}), 500
+        
+
 
 @app.route('/genie', methods=['POST'])
 def genie():
