@@ -82,6 +82,31 @@ Talx API is the core AI backend for the Talx job portal, handling functionalitie
     ```
     - **Note**: The `skill_match_score` will only be included in the response if a `job_description` is provided.
 
+- **`POST /upload-resume/test`**
+  - **Description**: Sample test API for validating file upload flow without calling the AI model.
+  - **Headers**:
+    - `Authorization`: Same secret used by production routes.
+  - **Form Data**:
+    - `file`: PDF file of the resume.
+    - `job_description`: (Optional) Text of the job description.
+  - **Response**:
+    ```json
+    {
+      "test_mode": true,
+      "summary": {
+        "matching_analysis": "This is a mock analysis from the test endpoint.",
+        "description": "Sample resume parsing works correctly. Connect to /upload-resume for real AI analysis.",
+        "score": 78,
+        "skill_match_score": 80,
+        "recommendation": "Use this test route to validate frontend upload flow, then switch to production route."
+      },
+      "file_info": {
+        "filename": "resume.pdf",
+        "size_kb": 124.6
+      }
+    }
+    ```
+
 ---
 
 ### 3. **Chat Assistant**  
@@ -164,6 +189,14 @@ Use Postman or cURL to test:
 ```bash
 curl -X POST http://127.0.0.1:5000/upload-resume \
 -H "Authorization: Bearer your_secret_key" \
+-F "file=@resume.pdf" \
+-F "job_description=Software Engineer role."
+```
+
+Use this cURL for the sample test endpoint (no AI model call):
+```bash
+curl -X POST http://127.0.0.1:5000/upload-resume/test \
+-H "Authorization: your_secret_key" \
 -F "file=@resume.pdf" \
 -F "job_description=Software Engineer role."
 ```
